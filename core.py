@@ -278,23 +278,26 @@ def get_community_perregion(city, regionname=u'xicheng'):
     if check_block(soup):
         return
     total_pages = misc.get_total_pages(url)
-
+    
     if total_pages == None:
         row = model.Community.select().count()
         raise RuntimeError("Finish at %s because total_pages is None" % row)
 
-    for page in range(total_pages):
+    # for page in range(total_pages):
+    for page in range(2):
         if page > 0:
             url_page = baseUrl + u"xiaoqu/" + regionname + "/pg%d/" % page
             source_code = misc.get_source_code(url_page)
             soup = BeautifulSoup(source_code, 'lxml')
 
-        nameList = soup.findAll("li", {"class": "clear"})
+        nameList = soup.findAll("li", {"class": "clear xiaoquListItem"})
         i = 0
         log_progress("GetCommunityByRegionlist",
                      regionname, page + 1, total_pages)
         data_source = []
+        
         for name in nameList:  # Per house loop
+            
             i = i + 1
             info_dict = {}
             try:
@@ -325,7 +328,7 @@ def get_community_perregion(city, regionname=u'xicheng'):
 
                 price = name.find("div", {"class": "totalPrice"})
                 info_dict.update({u'price': price.span.get_text().strip('\n')})
-
+                
                 communityinfo = get_communityinfo_by_url(link)
                 for key, value in communityinfo.iteritems():
                     info_dict.update({key: value})
@@ -339,6 +342,7 @@ def get_community_perregion(city, regionname=u'xicheng'):
         with model.database.atomic():
             if data_source:
                 model.Community.insert_many(data_source).upsert().execute()
+                         
         time.sleep(1)
 
 
@@ -599,7 +603,7 @@ def get_rent_perregion(city, district):
                 model.Rentinfo.insert_many(data_source).upsert().execute()
         time.sleep(1)
 
-
+#获得小区的信息
 def get_communityinfo_by_url(url):
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
@@ -627,7 +631,7 @@ def get_communityinfo_by_url(url):
             res.update({key_info: value_info})
 
         except:
-            continue
+            continue   
     return res
 
 
