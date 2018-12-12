@@ -283,8 +283,8 @@ def get_community_perregion(city, regionname=u'xicheng'):
         row = model.Community.select().count()
         raise RuntimeError("Finish at %s because total_pages is None" % row)
 
-    # for page in range(total_pages):
-    for page in range(2):
+    for page in range(total_pages):
+    # for page in range(1):
         if page > 0:
             url_page = baseUrl + u"xiaoqu/" + regionname + "/pg%d/" % page
             source_code = misc.get_source_code(url_page)
@@ -334,15 +334,19 @@ def get_community_perregion(city, regionname=u'xicheng'):
                     info_dict.update({key: value})
 
                 info_dict.update({u'city': city})
+                print info_dict
+                model.Community.insert(**info_dict).upsert().execute()
             except:
+                print "except~~!!"
+                print info_dict
                 continue
+            #看起来，upsert有些问题，会一值报错，所以批量也可以去掉了。    
             # communityinfo insert into mysql
-            data_source.append(info_dict)
-            # model.Community.insert(**info_dict).upsert().execute()
-        with model.database.atomic():
-            if data_source:
-                model.Community.insert_many(data_source).upsert().execute()
-                         
+            # data_source.append(info_dict)            
+        # with model.database.atomic():
+        #     if data_source:
+        #         model.Community.insert_many(data_source).upsert().execute()
+        print "test"                  
         time.sleep(1)
 
 

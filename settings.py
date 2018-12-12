@@ -11,5 +11,5 @@ DBHOST = 'localhost'
 DBPORT = 5432
 CITY = 'sz'  # only one, shanghai=sh shenzhen=sz
 # REGIONLIST = [u'futianqu',u'luohuqu',u'nanshanqu',u'yantianqu',u'longgangqu',u'longhuaqu',u'guangmingxinqu',u'pingshanqu',u'dapengxinqu']
-REGIONLIST = [u'futianqu']
+REGIONLIST = [u'futianqu',u'luohuqu',u'nanshanqu',u'yantianqu']
 
