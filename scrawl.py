@@ -18,9 +18,14 @@ def originalCode():
     core.GetCommunityByRegionlist(city, regionlist)
     communitylist = get_communitylist(city)  # Read celllist from database
     core.GetSellByCommunitylist(city, communitylist)
+
 if __name__ == "__main__":
     # originalCode()
     regionlist = settings.REGIONLIST  # only pinyin support
     city = settings.CITY
-    model.database_init()
-    core.GetCommunityByRegionlist(city, regionlist)
+    # model.database_init()
+    # core.GetCommunityByRegionlist(city, regionlist)
+    communitylist = get_communitylist(city)
+    core.GetHouseByCommunitylist(city, communitylist)
+    core.GetSellByCommunitylist(city, communitylist)
+

@@ -98,6 +98,7 @@ def get_house_percommunity(city, communityname):
     baseUrl = u"http://%s.lianjia.com/" % (city)
     url = baseUrl + u"ershoufang/rs" + \
         urllib2.quote(communityname.encode('utf8')) + "/"
+         
     source_code = misc.get_source_code(url)
     soup = BeautifulSoup(source_code, 'lxml')
 
@@ -108,19 +109,19 @@ def get_house_percommunity(city, communityname):
     if total_pages == None:
         row = model.Houseinfo.select().count()
         raise RuntimeError("Finish at %s because total_pages is None" % row)
-
-    for page in range(total_pages):
-        if page > 0:
+    #从第二页才开始存入。page1在初始化的时候就已经放进去了,无须修改链接
+    for page in range(1,total_pages+1):
+        if page > 1:
             url_page = baseUrl + \
                 u"ershoufang/pg%drs%s/" % (page,
                                            urllib2.quote(communityname.encode('utf8')))
             source_code = misc.get_source_code(url_page)
             soup = BeautifulSoup(source_code, 'lxml')
-
+            print url_page
         nameList = soup.findAll("li", {"class": "clear"})
         i = 0
         log_progress("GetHouseByCommunitylist",
-                     communityname, page + 1, total_pages)
+                     communityname, page, total_pages)
         data_source = []
         hisprice_data_source = []
         for name in nameList:  # per house loop
@@ -161,6 +162,8 @@ def get_house_percommunity(city, communityname):
                 info_dict.update({u'unitPrice': unitPrice.get('data-price')})
                 info_dict.update({u'houseID': unitPrice.get('data-hid')})
             except:
+                print "except~~"
+                print info_dict
                 continue
             # houseinfo insert into mysql
             data_source.append(info_dict)
@@ -171,10 +174,10 @@ def get_house_percommunity(city, communityname):
 
         with model.database.atomic():
             if data_source:
-                model.Houseinfo.insert_many(data_source).upsert().execute()
+                model.Houseinfo.insert_many(data_source).execute()
             if hisprice_data_source:
                 model.Hisprice.insert_many(
-                    hisprice_data_source).upsert().execute()
+                    hisprice_data_source).execute()
         time.sleep(1)
 
 
@@ -192,9 +195,9 @@ def get_sell_percommunity(city, communityname):
     if total_pages == None:
         row = model.Sellinfo.select().count()
         raise RuntimeError("Finish at %s because total_pages is None" % row)
-
-    for page in range(total_pages):
-        if page > 0:
+    #从第二页才开始存入。page1在初始化的时候就已经放进去了,无须修改链接
+    for page in range(1,total_pages+1):
+        if page > 1:
             url_page = baseUrl + \
                 u"chengjiao/pg%drs%s/" % (page,
                                           urllib2.quote(communityname.encode('utf8')))
@@ -202,7 +205,7 @@ def get_sell_percommunity(city, communityname):
             soup = BeautifulSoup(source_code, 'lxml')
 
         log_progress("GetSellByCommunitylist",
-                     communityname, page + 1, total_pages)
+                     communityname, page, total_pages)
         data_source = []
         for ultag in soup.findAll("ul", {"class": "listContent"}):
             for name in ultag.find_all('li'):
@@ -265,7 +268,7 @@ def get_sell_percommunity(city, communityname):
 
         with model.database.atomic():
             if data_source:
-                model.Sellinfo.insert_many(data_source).upsert().execute()
+                model.Sellinfo.insert_many(data_source).execute()
         time.sleep(1)
 
 

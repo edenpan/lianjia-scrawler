@@ -108,7 +108,7 @@ def spider_proxyip():
 
 def test_proxyip_thread(i):
     socket.setdefaulttimeout(5)
-    url = "http://bj.lianjia.com"
+    url = "http://sz.lianjia.com"
     try:
         proxy_support = urllib.request.ProxyHandler(proxys_src[i])
         opener = urllib.request.build_opener(proxy_support)
