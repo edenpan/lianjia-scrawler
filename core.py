@@ -334,11 +334,15 @@ def get_community_perregion(city, regionname=u'xicheng'):
                     info_dict.update({key: value})
 
                 info_dict.update({u'city': city})
-                print info_dict
-                model.Community.insert(**info_dict).upsert().execute()
+                # print info_dict
+                model.Community.insert(**info_dict).execute()
             except:
                 print "except~~!!"
                 print info_dict
+                try:
+                    model.Community.insert(**info_dict).execute()
+                except:
+                    continue                    
                 continue
             #看起来，upsert有些问题，会一值报错，所以批量也可以去掉了。    
             # communityinfo insert into mysql
