@@ -338,22 +338,23 @@ def get_community_perregion(city, regionname=u'xicheng'):
 
                 info_dict.update({u'city': city})
                 # print info_dict
-                model.Community.insert(**info_dict).execute()
+                # model.Community.insert(**info_dict).execute()
             except:
                 print "except~~!!"
-                print info_dict
-                try:
-                    model.Community.insert(**info_dict).execute()
-                except:
-                    continue                    
+                print info_dict 
+                data_source.append(info_dict)                  
                 continue
-            #看起来，upsert有些问题，会一值报错，所以批量也可以去掉了。    
+            # 修改为使用on_conflict。3.0之后peewee更新的。
             # communityinfo insert into mysql
-            # data_source.append(info_dict)            
-        # with model.database.atomic():
-        #     if data_source:
-        #         model.Community.insert_many(data_source).upsert().execute()
-        print "test"                  
+            data_source.append(info_dict)            
+        with model.database.atomic():
+            if data_source:
+                # model.Community.insert_many(data_source).upsert().execute()
+                model.Community.insert_many(data_source).on_conflict(conflict_target=[model.Community.id], preserve=[model.Community.title, model.Community.link, model.Community.district, \
+                model.Community.bizcircle, model.Community.tagList, model.Community.onsale, model.Community.onrent, model.Community.year, \
+                model.Community.housetype, model.Community.cost, model.Community.service, \
+                model.Community.company, model.Community.building_num, model.Community.house_num, \
+                model.Community.price, model.Community.city],update={}).execute()
         time.sleep(1)
 
 

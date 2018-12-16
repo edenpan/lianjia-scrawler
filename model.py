@@ -124,3 +124,15 @@ def database_init():
     database.create_tables(
         [Community, Houseinfo, Hisprice, Sellinfo, Rentinfo], safe=True)
     database.close()
+
+
+class User(BaseModel):
+    username = TextField(unique=True)
+    last_login = DateTimeField(null=True)
+    login_count = IntegerField()
+
+def database_init2():
+    database.connect()
+    database.create_tables(
+        [User], safe=True)
+    database.close()    
