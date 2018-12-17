@@ -25,11 +25,11 @@ def originalCode():
 
 def testUpsertDB():
     hisprice_data_source = []
-    # info_dict = {'houseID': "121", 'totalPrice': '121100'}
-    info_dict = {"id":121, "title":u'京基御景华城', "link":'https://sz.lianjia.com/xiaoqu/121', 'district': u'福田区', 'bizcircle': u'赤尾1', 'tagList': u'近地铁7号线赤尾站'\
+    # info_dict = {'houseID': "121", 'totalPrice': '12110'}
+    info_dict = {"id":121, "title":u'京基御景华城', "link":'https://sz.lianjia.com/xiaoqu/12221', 'district': u'福田区', 'bizcircle': u'赤尾1', 'tagList': u'近地铁7号线赤尾站'\
      ,'onsale':'1', 'year':'' }
     # hisprice_data_source.append(
-                    # {"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]})
+    #                 {"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]})
     # model.Hisprice.insert_many(
     #                 hisprice_data_source).upsert().execute()                    
 
@@ -45,10 +45,12 @@ if __name__ == "__main__":
     regionlist = settings.REGIONLIST  # only pinyin support
     city = settings.CITY
     # model.database_init()
-    core.GetCommunityByRegionlist(city, regionlist)
-    # communitylist = get_communitylist(city)
-    # core.GetHouseByCommunitylist(city, communitylist)
-    # core.GetSellByCommunitylist(city, communitylist)
+    # core.GetCommunityByRegionlist(city, regionlist)
+    communitylist = get_communitylist(city)
+    # print communitylist
+    core.GetHouseByCommunitylist(city, communitylist)
+    core.GetSellByCommunitylist(city, communitylist)
+    # core.GetRentByCommunitylist(city, communitylist)
     # testUpsertDB()
     
 

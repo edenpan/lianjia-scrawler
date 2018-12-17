@@ -6,6 +6,7 @@ import time
 import datetime
 import urllib2
 import logging
+import datetime
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -161,23 +162,24 @@ def get_house_percommunity(city, communityname):
                 unitPrice = name.find("div", {"class": "unitPrice"})
                 info_dict.update({u'unitPrice': unitPrice.get('data-price')})
                 info_dict.update({u'houseID': unitPrice.get('data-hid')})
-            except:
-                print "except~~"
+                info_dict.update({u'validdate': datetime.datetime.now()})
+                model.Houseinfo.insert(info_dict).on_conflict(conflict_target=[model.Houseinfo.houseID], \
+                preserve=[model.Houseinfo.title, model.Houseinfo.link, model.Houseinfo.community, \
+                model.Houseinfo.years, model.Houseinfo.housetype, model.Houseinfo.square, \
+                model.Houseinfo.direction, model.Houseinfo.floor, model.Houseinfo.taxtype, \
+                model.Houseinfo.totalPrice, model.Houseinfo.unitPrice, model.Houseinfo.followInfo, \
+                model.Houseinfo.decoration, model.Houseinfo.validdate],update={}).execute()
+
+                hisprice = {"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]}
+                model.Hisprice.insert(hisprice).on_conflict(conflict_target = [model.Hisprice.houseID, model.Hisprice.totalPrice],\
+                preserve=[model.Hisprice.houseID,model.Hisprice.totalPrice,model.Hisprice.date],\
+                update={}).execute()
+            except Exception as e:
+                logging.error(e)
                 print info_dict
                 continue
             # houseinfo insert into mysql
-            data_source.append(info_dict)
-            hisprice_data_source.append(
-                {"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]})
-            # model.Houseinfo.insert(**info_dict).upsert().execute()
-            #model.Hisprice.insert(houseID=info_dict['houseID'], totalPrice=info_dict['totalPrice']).upsert().execute()
-
-        with model.database.atomic():
-            if data_source:
-                model.Houseinfo.insert_many(data_source).execute()
-            if hisprice_data_source:
-                model.Hisprice.insert_many(
-                    hisprice_data_source).execute()
+            
         time.sleep(1)
 
 
@@ -259,16 +261,17 @@ def get_sell_percommunity(city, communityname):
                     dealDate = name.find("div", {"class": "dealDate"})
                     info_dict.update(
                         {u'dealdate': dealDate.get_text().strip().replace('.', '-')})
-
-                except:
+                    info_dict.update({u'updatedate': datetime.datetime.now()})
+                    model.Sellinfo.insert(info_dict).on_conflict(conflict_target=[model.Sellinfo.houseID], \
+                    preserve=[model.Sellinfo.title, model.Sellinfo.link, model.Sellinfo.community, \
+                    model.Sellinfo.years, model.Sellinfo.housetype, model.Sellinfo.square, \
+                    model.Sellinfo.direction, model.Sellinfo.floor, model.Sellinfo.status, \
+                    model.Sellinfo.source, model.Sellinfo.totalPrice, model.Sellinfo.unitPrice, \
+                    model.Sellinfo.dealdate, model.Sellinfo.updatedate],update={}).execute()
+                except Exception as e:
+                    logging.error(e)
+                    print info_dict
                     continue
-                # Sellinfo insert into mysql
-                data_source.append(info_dict)
-                # model.Sellinfo.insert(**info_dict).upsert().execute()
-
-        with model.database.atomic():
-            if data_source:
-                model.Sellinfo.insert_many(data_source).execute()
         time.sleep(1)
 
 
@@ -335,14 +338,16 @@ def get_community_perregion(city, regionname=u'xicheng'):
                     info_dict.update({key: value})
 
                 info_dict.update({u'city': city})
+                info_dict.update({u'validdate': datetime.datetime.now()})
                 data_source.append(info_dict)  
                 model.Community.insert(info_dict).on_conflict(conflict_target=[model.Community.id], preserve=[model.Community.title, model.Community.link, model.Community.district, \
                 model.Community.bizcircle, model.Community.tagList, model.Community.onsale, model.Community.onrent, model.Community.year, \
                 model.Community.housetype, model.Community.cost, model.Community.service, \
                 model.Community.company, model.Community.building_num, model.Community.house_num, \
-                model.Community.price, model.Community.city],update={}).execute()
-            except:
+                model.Community.price, model.Community.city,model.Community.validdate],update={}).execute()
+            except Exception as e:
                 print "except~~!!"
+                logging.error(e)
                 print info_dict 
                 # data_source.append(info_dict)                  
                 continue      
@@ -362,6 +367,7 @@ def get_rent_percommunity(city, communityname):
 
     if total_pages == None:
         row = model.Rentinfo.select().count()
+        print url
         raise RuntimeError("Finish at %s because total_pages is None" % row)
 
     for page in range(total_pages):
@@ -424,16 +430,20 @@ def get_rent_percommunity(city, communityname):
                     pricepre = name.find("div", {"class": "price-pre"})
                     info_dict.update(
                         {u'pricepre': pricepre.get_text().strip()})
+                    info_dict.update({u'updatedate': datetime.datetime.now()})
+                    model.Rentinfo.insert(info_dict).on_conflict(conflict_target=[model.Community.id], \
+                    preserve=[model.Rentinfo.title, model.Rentinfo.link, \
+                    model.Rentinfo.region, model.Rentinfo.zone, model.Rentinfo.meters, \
+                    model.Rentinfo.other, model.Rentinfo.subway, model.Rentinfo.decoration, \
+                    model.Rentinfo.heating, model.Rentinfo.price, model.Rentinfo.pricepre, \
+                    model.Rentinfo.updatedate],update={}).execute()
+                except Exception as e:
+                    print "except~~!!"
+                    logging.error(e)
+                    print info_dict 
+                    # data_source.append(info_dict)                  
+                    continue      
 
-                except:
-                    continue
-                # Rentinfo insert into mysql
-                data_source.append(info_dict)
-                # model.Rentinfo.insert(**info_dict).upsert().execute()
-
-        with model.database.atomic():
-            if data_source:
-                model.Rentinfo.insert_many(data_source).upsert().execute()
         time.sleep(1)
 
 
@@ -503,15 +513,24 @@ def get_house_perregion(city, district):
                     unitPrice = name.find("div", {"class": "unitPrice"})
                     info_dict.update(
                         {u'unitPrice': unitPrice.get("data-price")})
-                except:
-                    continue
+                    info_dict.update({u'validdate': datetime.datetime.now()})
+                    model.Houseinfo.insert(info_dict).on_conflict(conflict_target=[model.Houseinfo.houseID], \
+                    preserve=[model.Houseinfo.title, model.Houseinfo.link, model.Houseinfo.community, \
+                    model.Houseinfo.years, model.Houseinfo.housetype, model.Houseinfo.square, \
+                    model.Houseinfo.direction, model.Houseinfo.floor, model.Houseinfo.taxtype, \
+                    model.Houseinfo.totalPrice, model.Houseinfo.unitPrice, model.Houseinfo.followInfo, \
+                    model.Houseinfo.decoration, model.Houseinfo.validdate],update={}).execute()
 
-                # Houseinfo insert into mysql
-                data_source.append(info_dict)
-                hisprice_data_source.append(
-                    {"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]})
-                # model.Houseinfo.insert(**info_dict).upsert().execute()
-                #model.Hisprice.insert(houseID=info_dict['houseID'], totalPrice=info_dict['totalPrice']).upsert().execute()
+                    hisprice = {"houseID": info_dict["houseID"], "totalPrice": info_dict["totalPrice"]}
+                    model.Hisprice.insert(hisprice).on_conflict(conflict_target = [model.Hisprice.houseID, model.Hisprice.totalPrice],\
+                    preserve=[model.Hisprice.houseID,model.Hisprice.totalPrice,model.Hisprice.date],\
+                    update={}).execute()                        
+                except Exception as e:
+                    print "except~~!!"
+                    logging.error(e)
+                    print info_dict 
+                    # data_source.append(info_dict)                  
+                    continue   
 
         with model.database.atomic():
             if data_source:
