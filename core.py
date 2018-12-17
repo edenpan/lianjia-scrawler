@@ -285,10 +285,9 @@ def get_community_perregion(city, regionname=u'xicheng'):
     if total_pages == None:
         row = model.Community.select().count()
         raise RuntimeError("Finish at %s because total_pages is None" % row)
-
-    for page in range(total_pages):
-    # for page in range(1):
-        if page > 0:
+    
+    for page in range(1,total_pages+1):
+        if page > 1:
             url_page = baseUrl + u"xiaoqu/" + regionname + "/pg%d/" % page
             source_code = misc.get_source_code(url_page)
             soup = BeautifulSoup(source_code, 'lxml')
@@ -296,11 +295,10 @@ def get_community_perregion(city, regionname=u'xicheng'):
         nameList = soup.findAll("li", {"class": "clear xiaoquListItem"})
         i = 0
         log_progress("GetCommunityByRegionlist",
-                     regionname, page + 1, total_pages)
+                     regionname, page, total_pages)
         data_source = []
         
         for name in nameList:  # Per house loop
-            
             i = i + 1
             info_dict = {}
             try:
@@ -337,24 +335,17 @@ def get_community_perregion(city, regionname=u'xicheng'):
                     info_dict.update({key: value})
 
                 info_dict.update({u'city': city})
-                # print info_dict
-                # model.Community.insert(**info_dict).execute()
-            except:
-                print "except~~!!"
-                print info_dict 
-                data_source.append(info_dict)                  
-                continue
-            # 修改为使用on_conflict。3.0之后peewee更新的。
-            # communityinfo insert into mysql
-            data_source.append(info_dict)            
-        with model.database.atomic():
-            if data_source:
-                # model.Community.insert_many(data_source).upsert().execute()
-                model.Community.insert_many(data_source).on_conflict(conflict_target=[model.Community.id], preserve=[model.Community.title, model.Community.link, model.Community.district, \
+                data_source.append(info_dict)  
+                model.Community.insert(info_dict).on_conflict(conflict_target=[model.Community.id], preserve=[model.Community.title, model.Community.link, model.Community.district, \
                 model.Community.bizcircle, model.Community.tagList, model.Community.onsale, model.Community.onrent, model.Community.year, \
                 model.Community.housetype, model.Community.cost, model.Community.service, \
                 model.Community.company, model.Community.building_num, model.Community.house_num, \
                 model.Community.price, model.Community.city],update={}).execute()
+            except:
+                print "except~~!!"
+                print info_dict 
+                # data_source.append(info_dict)                  
+                continue      
         time.sleep(1)
 
 
@@ -612,6 +603,8 @@ def get_rent_perregion(city, district):
 
         with model.database.atomic():
             if data_source:
+                print "data_source:~~"
+                print data_source
                 model.Rentinfo.insert_many(data_source).upsert().execute()
         time.sleep(1)
 
