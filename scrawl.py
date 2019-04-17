@@ -44,8 +44,8 @@ if __name__ == "__main__":
     # originalCode()
     regionlist = settings.REGIONLIST  # only pinyin support
     city = settings.CITY
-    # model.database_init()
-    # core.GetCommunityByRegionlist(city, regionlist)
+    model.database_init()
+    core.GetCommunityByRegionlist(city, regionlist)
     communitylist = get_communitylist(city)
     # print communitylist
     core.GetHouseByCommunitylist(city, communitylist)
