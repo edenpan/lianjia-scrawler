@@ -50,7 +50,7 @@ if __name__ == "__main__":
     # print communitylist
     core.GetHouseByCommunitylist(city, communitylist)
     core.GetSellByCommunitylist(city, communitylist)
-    # core.GetRentByCommunitylist(city, communitylist)
+    core.GetRentByCommunitylist(city, communitylist)
     # testUpsertDB()
     
 
